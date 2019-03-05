@@ -41,7 +41,7 @@ function draw() {
         // add some popup text
         let popUpText = `I'm sitting out here on this ${weather.current.skytext} ${weather.current.day} and it feels like ${weather.current.feelslike}℃ outside.`;
         
-        if(pollution){
+        if(pollution.results.length>0){
             popUpText += `\nThe concentration of small carcinogenic particles (pm2.5) I'm breathing in is ${pollution.results[0].measurements[0].value}${pollution.results[0].measurements[0].unit}`
             popUpText += `\nmeasured from ${pollution.results[0].city} at ${pollution.results[0].location}.`
         }
