@@ -2,7 +2,8 @@ const express = require('express');
 const logger = require('morgan');
 const path = require('path');
 const http = require('http');
-const port = process.env.PORT || 3030;
+const config = require('./config');
+const basicAuth = require('express-basic-auth');
 const Datastore = require('nedb');
 const pathToData = path.resolve(__dirname, "db/db")
 const db = new Datastore({ filename: pathToData});
@@ -28,14 +29,38 @@ app.use(express.urlencoded({extended:true}));
 const publicPath = path.resolve(__dirname, 'public')
 app.use( express.static(publicPath))
 
+
+
+/****************************
+ * your authentication 
+ ****************************/
+const challengeAuth = basicAuth({
+    authorizer: myAuthorizer,
+    challenge: true,
+    unauthorizedResponse:getUnauthorizedResponse
+})
+//Custom authorizer checking if the username starts with 'A' and the password with 'secret'
+function myAuthorizer(username, password) {
+    return username == config.USERNAME && password == config.PASSWORD
+}
+function getUnauthorizedResponse(req) {
+    return 'not authorized'
+}
+
+/****************************
+ * your view
+ ****************************/
 // Show index.html
-app.get("/", (req, res) => {
+app.get("/", challengeAuth, (req, res) => {
     res.sendFile('index.html')
 });
 
 
-// Show submission page
-app.get("/weather/:lat/:lng", (req, res) => {
+/****************************
+ * API endpoints
+ ****************************/
+// GET Show submission page
+app.get("/weather/:lat/:lng", challengeAuth, (req, res) => {
     let latlng = `${req.params.lat},${req.params.lng}`
 
     let searchOptions = {
@@ -53,22 +78,22 @@ app.get("/weather/:lat/:lng", (req, res) => {
 });
 
 
-// send all the checkins to this endpoint
-app.get("/checkins", (req, res) => {
+// GET - send all the checkins to this endpoint
+app.get("/checkins", challengeAuth, (req, res) => {
     db.find({}).sort({created:-1}).exec( (err, docs) => {
         res.send(docs);
     })
 });
 
 
-// when navigating to this route, give me the map view
-app.get("/checkin", (req, res) => {
+// GET - when navigating to this route, give me the map view
+app.get("/checkin", challengeAuth, (req, res) => {
     res.sendFile('/checkin/index.html')
 });
 
 
-// accept a payload to this checkin post endpoint
-app.post("/checkin", (req, res) => {
+// POST - accept a payload to this checkin post endpoint
+app.post("/checkin", challengeAuth, (req, res) => {
 
     // our unix timestamp
     const unixTimeCreated = new Date().getTime();
@@ -101,6 +126,6 @@ app.post("/checkin", (req, res) => {
 });
 
 
-http.createServer(app).listen(port, ()=>{
-    console.log(`see the magic at: http://localhost:${port}`);
+http.createServer(app).listen(config.PORT, ()=>{
+    console.log(`see the magic at: http://localhost:${config.PORT}`);
 })
