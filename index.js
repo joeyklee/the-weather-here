@@ -78,7 +78,7 @@ app.post("/checkin", (req, res) => {
     const newData = Object.assign({"created": unixTimeCreated}, req.body)
 
     // QUERY THE OPEN AQ PLATFORM FOR AIR QUALITY DATA
-    const searchDistance = 10000; // meters == 10km
+    const searchDistance = 20000; // meters == 20km
     let openAQUrl = `https://api.openaq.org/v1/latest?coordinates=${req.body.location.lat},${req.body.location.lon}&nearest=${searchDistance}`
 
     fetch(openAQUrl)

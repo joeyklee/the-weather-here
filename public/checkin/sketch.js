@@ -34,9 +34,10 @@ function draw() {
         let pollution = item.pollution;
 
         // add a circle to the myMap variable
-        let currentCircle = L.circle([location.lat, location.lon], 700, {
-            color: "red"
-        }).addTo(myMap);
+        // let currentCircle = L.circle([location.lat, location.lon], 700, {
+        //     color: "red"
+        // }).addTo(myMap);
+        let currentCircle = L.marker([location.lat, location.lon]).addTo(myMap);
 
         // add some popup text
         let popUpText = `I'm sitting out here on this ${weather.current.skytext} ${weather.current.day} and it feels like ${weather.current.feelslike}℃ outside.`;
